@@ -33,6 +33,10 @@ func (srv *rateLimiterService) RequireResource(ctx context.Context, addr string,
 		key string
 	)
 
+	if addr == "" {
+		return nil, errors.ErrInternal.Build("addr must need input")
+	}
+
 	// why key format is url + : + addr ?
 	// because I want to distinguish url require count
 	// every url resource can has own rate limit

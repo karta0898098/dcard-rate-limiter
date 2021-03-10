@@ -22,3 +22,13 @@ ratelimiter.dev.env:
 .PHONY: ratelimiter.dev.env.down
 ratelimiter.dev.env.down:
 	docker-compose -p ratelimiter -f ./deployments/environment/docker-compose.dev.yml down
+
+.PHONY: uint.testing
+uint.testing:
+	go test ./...
+
+.PHONY: integration.testing
+integration.testing:
+	docker-compose -p ratelimiter -f ./deployments/environment/docker-compose.dev.yml up -d && \
+	go clean -testcache && go test ./cmd/app && \
+	docker-compose -p ratelimiter -f ./deployments/environment/docker-compose.dev.yml down

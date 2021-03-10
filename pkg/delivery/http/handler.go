@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/karta0898098/dcard-rate-limiter/pkg/ratelimiter/domain"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -38,7 +37,6 @@ func (h *Handler) ProtectedEndpoint(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 
 	// in here do you want service
 
