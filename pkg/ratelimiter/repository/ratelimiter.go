@@ -5,14 +5,16 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/karta0898098/kara/errors"
 	"github.com/karta0898098/kara/timeutil"
 	"github.com/karta0898098/kara/tracer"
+
+	"github.com/go-redis/redis/v8"
 )
 
 var _ RateLimiterRepository = &rateLimiterRepository{}
 
+// RateLimiterRepository define rate limit  method
 type RateLimiterRepository interface {
 	AddRequestCount(ctx context.Context, key string, timeUintSecond int64) (err error)
 	GetRequestCount(ctx context.Context, key string) (count int64, err error)
@@ -22,12 +24,15 @@ type rateLimiterRepository struct {
 	redisClient *redis.Client
 }
 
+// NewRateLimiterRepository ...
 func NewRateLimiterRepository(redisClient *redis.Client) RateLimiterRepository {
 	return &rateLimiterRepository{
 		redisClient: redisClient,
 	}
 }
 
+// AddRequestCount implement redis slide windows algorithm
+// ref : https://en.wikipedia.org/wiki/Sliding_window_protocol
 func (repo *rateLimiterRepository) AddRequestCount(ctx context.Context, key string, timeUintSecond int64) (err error) {
 	var (
 		nowTimeMS  int64
@@ -55,6 +60,7 @@ func (repo *rateLimiterRepository) AddRequestCount(ctx context.Context, key stri
 	return nil
 }
 
+// GetRequestCount get now ip request count
 func (repo *rateLimiterRepository) GetRequestCount(ctx context.Context, key string) (count int64, err error) {
 	count, err = repo.redisClient.ZCard(ctx, key).Result()
 	if err != nil {

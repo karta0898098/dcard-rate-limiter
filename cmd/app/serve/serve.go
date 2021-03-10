@@ -17,6 +17,7 @@ import (
 	"go.uber.org/fx"
 )
 
+// Run application
 func Run() {
 	var (
 		path string

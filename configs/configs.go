@@ -13,6 +13,7 @@ import (
 	"go.uber.org/fx"
 )
 
+// Configurations aggregate all config
 type Configurations struct {
 	fx.Out
 	Log       zlog.Config

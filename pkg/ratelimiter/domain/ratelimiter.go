@@ -11,6 +11,7 @@ type Claims struct {
 
 // RateLimiterService define rate limiter
 type RateLimiterService interface {
-	// RequireResource try to get claims
+	// RequireResource require access resource
+	// if too many request will return error
 	RequireResource(ctx context.Context, addr string, url string) (claims *Claims, err error)
 }

@@ -17,6 +17,7 @@ type rateLimiterService struct {
 	repo           repository.RateLimiterRepository
 }
 
+// NewRateLimiterService ...
 func NewRateLimiterService(repo repository.RateLimiterRepository, config Config) domain.RateLimiterService {
 	return &rateLimiterService{
 		maxCount:       config.MaxCount,
@@ -25,11 +26,16 @@ func NewRateLimiterService(repo repository.RateLimiterRepository, config Config)
 	}
 }
 
+// RequireResource require access resource
+// if too many request will return error
 func (srv *rateLimiterService) RequireResource(ctx context.Context, addr string, url string) (claims *domain.Claims, err error) {
 	var (
 		key string
 	)
 
+	// why key format is url + : + addr ?
+	// because I want to distinguish url require count
+	// every url resource can has own rate limit
 	key = url + ":" + addr
 
 	count, err := srv.repo.GetRequestCount(ctx, key)
