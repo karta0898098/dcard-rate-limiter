@@ -8,6 +8,7 @@ docker.build:
 
 .PHONY: docker.deploy
 docker.deploy:
+	docker build -f ./deployments/build/Dockerfile -t ratelimiter . && \
 	docker-compose -p ratelimiter -f ./deployments/environment/docker-compose.deploy.yml up -d
 
 .PHONY: docker.deploy.down
