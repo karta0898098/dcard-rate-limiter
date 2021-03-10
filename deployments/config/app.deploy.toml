@@ -1,0 +1,17 @@
+[log]
+env = "local"
+app_id = "rate_limiter"
+debug = true
+level = 0
+
+[http]
+mode = "debug"
+port = ":18080"
+dump = true
+
+[redis]
+addr = "redis:6379"
+
+[rateLimit]
+max_count = 60
+rate_limit_sec = 60

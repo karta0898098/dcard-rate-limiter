@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  redis:
+    image: "redis:latest"
+    ports:
+      - "16379:6379"
+    restart: always
+    networks:
+      - ratelimiter
+  app:
+    image: "ratelimiter:latest"
+    ports:
+      - "18080:18080"
+    networks:
+      - ratelimiter
+    volumes:
+      - ../config:/app/deployments/config
+    environment:
+      CONFIG_NAME: app.deploy
+networks:
+  ratelimiter:
+    name: ratelimiter
