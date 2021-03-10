@@ -15,7 +15,7 @@ dcard web backend developer home test.
  make docker.deploy
  ```
 
-也可使用 docker-compose 啟動所需要的環境配置，並且直接執行 go run 的方式 ``推薦`` 速度較快，但是依賴 go 1.16 的 sdk。
+``推薦``也可使用 docker-compose 啟動所需要的環境配置，並且直接執行 go run 的方式執行速度較快，但是依賴 go 1.16 的 sdk。
 
 ```
 make ratelimiter.dev.env
