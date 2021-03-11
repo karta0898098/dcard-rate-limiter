@@ -25,7 +25,7 @@ ratelimiter.dev.env.down:
 
 .PHONY: uint.testing
 uint.testing:
-	go test ./...
+	go test github.com/karta0898098/dcard-rate-limiter/pkg/ratelimiter/service
 
 .PHONY: integration.testing
 integration.testing:

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/karta0898098/dcard-rate-limiter/configs"
+	"github.com/karta0898098/dcard-rate-limiter/internal/zookeeper"
 	restful "github.com/karta0898098/dcard-rate-limiter/pkg/delivery/http"
 	"github.com/karta0898098/dcard-rate-limiter/pkg/ratelimiter"
 
@@ -30,6 +31,7 @@ func Run() {
 	app := fx.New(
 		fx.Supply(config),
 		ratelimiter.Module,
+		fx.Provide(zookeeper.NewZookeeper),
 		fx.Provide(http.NewEcho),
 		fx.Provide(redis.NewRedis),
 		fx.Provide(restful.NewHandler),
@@ -48,3 +50,5 @@ func Run() {
 
 	log.Info().Msg("Server exiting")
 }
+
+

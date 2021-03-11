@@ -14,6 +14,10 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+var (
+	skipZookeeperLock = true
+)
+
 func TestRateLimiterServiceRequireResource(t *testing.T) {
 	var (
 		mockMaxCount       int64 = 10
@@ -157,6 +161,7 @@ func TestRateLimiterServiceRequireResource(t *testing.T) {
 				maxCount:       tt.fields.maxCount,
 				timeUintSecond: tt.fields.timeUintSecond,
 				repo:           tt.fields.repo(),
+				skipLock:       skipZookeeperLock,
 			}
 			claims, err := srv.RequireResource(tt.args.ctx, tt.args.addr, tt.args.url)
 			if err != nil {

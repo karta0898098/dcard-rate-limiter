@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"flag"
-	"net/http/httptest"
+	"io/ioutil"
+	"net/http"
+	"sync"
 	"testing"
 	"time"
 
@@ -11,13 +13,13 @@ import (
 	restful "github.com/karta0898098/dcard-rate-limiter/pkg/delivery/http"
 	"github.com/karta0898098/dcard-rate-limiter/pkg/ratelimiter"
 	"github.com/karta0898098/dcard-rate-limiter/pkg/ratelimiter/service"
+	httpInfra "github.com/karta0898098/kara/http"
 
+	"github.com/karta0898098/dcard-rate-limiter/internal/zookeeper"
 	rc "github.com/karta0898098/kara/redis"
-	"github.com/karta0898098/kara/tracer"
 	"github.com/karta0898098/kara/zlog"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
@@ -28,9 +30,6 @@ import (
 type rateLimiterTestSuite struct {
 	suite.Suite
 	app        *fx.App
-	handler    *restful.Handler
-	c          echo.Context
-	resp       *httptest.ResponseRecorder
 	redisClint *redis.Client
 }
 
@@ -46,10 +45,15 @@ func (s *rateLimiterTestSuite) SetupSuite() {
 	flag.Parse()
 
 	config := configs.Configurations{
+		Out: fx.Out{},
 		Log: zlog.Config{
 			Env:   "test",
 			AppID: "rate_limiter",
 			Debug: true,
+		},
+		Http: httpInfra.Config{
+			Mode: "debug",
+			Port: ":18080",
 		},
 		Redis: rc.Config{
 			Address: "127.0.0.1:16379",
@@ -58,30 +62,27 @@ func (s *rateLimiterTestSuite) SetupSuite() {
 			MaxCount:     60,
 			RateLimitSec: 60,
 		},
+		Zookeeper: zookeeper.Config{
+			Addr: "127.0.0.1:12181",
+		},
 	}
 
 	s.app = fx.New(
 		fx.Supply(config),
 		ratelimiter.Module,
+		fx.Provide(zookeeper.NewZookeeper),
 		fx.Provide(rc.NewRedis),
+		fx.Provide(httpInfra.NewEcho),
 		fx.Provide(restful.NewHandler),
 		fx.Invoke(zlog.Setup),
-		fx.Populate(&s.handler),
+		fx.Invoke(httpInfra.RunEcho),
+		fx.Invoke(restful.SetupRoute),
 		fx.Populate(&s.redisClint),
 	)
 	go s.app.Run()
 }
 
 func (s *rateLimiterTestSuite) SetupTest() {
-	e := echo.New()
-
-	req := httptest.NewRequest("GET", "/proctored", nil)
-	req.Header.Set(echo.HeaderXRealIP, "127.0.0.1")
-	s.resp = httptest.NewRecorder()
-	ctx := context.WithValue(req.Context(), tracer.TraceIDKey, uuid.New().String())
-	s.c = e.NewContext(req, s.resp)
-	s.c.SetPath("/proctored")
-	s.c.SetRequest(s.c.Request().WithContext(ctx))
 }
 
 func (s *rateLimiterTestSuite) TearDownTest() {
@@ -96,23 +97,38 @@ func (s *rateLimiterTestSuite) TearDownTest() {
 	log.Info().Msg("Server exiting")
 }
 
-func (s *rateLimiterTestSuite) TestRateLimiter() {
-	_ = s.handler.ProtectedEndpoint(s.c)
-	s.Equal(s.resp.Code, 200)
-}
-
 func (s *rateLimiterTestSuite) TestRateLimiterGotError() {
 	var (
-		task int
+		task    int
+		wg      sync.WaitGroup
+		success int
+		failed  int
 	)
 
-	task = 60
+	task = 61
+	wg.Add(task)
+
 	for i := 0; i < task; i++ {
-		err := s.handler.ProtectedEndpoint(s.c)
-		if i > task {
-			s.NotNil(err)
-		} else {
-			s.NoError(err)
-		}
+		go func(i int) {
+			defer wg.Done()
+
+			client := &http.Client{}
+			req, _ := http.NewRequest("GET", "http://localhost:18080/api/v1/protected", nil)
+			req.Header.Add(echo.HeaderXRealIP, "127.0.0.1")
+			resp, _ := client.Do(req)
+			data, _ := ioutil.ReadAll(resp.Body)
+			log.Debug().Msg(string(data))
+			if resp.StatusCode == 429 {
+				failed++
+			}
+
+			if resp.StatusCode == 200 {
+				success++
+			}
+		}(i)
 	}
+	wg.Wait()
+
+	s.Equal(60, success)
+	s.Equal(1, failed)
 }

@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"github.com/karta0898098/dcard-rate-limiter/internal/zookeeper"
 	"github.com/karta0898098/dcard-rate-limiter/pkg/ratelimiter/service"
 
 	"github.com/karta0898098/kara/http"
@@ -20,7 +21,10 @@ type Configurations struct {
 	Http      http.Config
 	Redis     redis.Config
 	RateLimit service.Config
+	Zookeeper zookeeper.Config
 }
+
+
 
 // NewConfig read configs and create new instance
 func NewConfig(path string) Configurations {

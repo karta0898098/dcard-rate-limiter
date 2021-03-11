@@ -4,13 +4,13 @@ go 1.16
 
 require (
 	github.com/go-redis/redis/v8 v8.6.0
-	github.com/google/uuid v1.1.1
 	github.com/karta0898098/kara v1.1.32
 	github.com/labstack/echo/v4 v4.1.16
 	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/rs/zerolog v1.20.0
+	github.com/samuel/go-zookeeper v0.0.0-20201211165307-7117e9ea2414
 	github.com/spf13/afero v1.5.1 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

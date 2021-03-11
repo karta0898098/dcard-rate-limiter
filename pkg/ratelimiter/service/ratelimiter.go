@@ -7,6 +7,8 @@ import (
 	"github.com/karta0898098/dcard-rate-limiter/pkg/ratelimiter/repository"
 
 	"github.com/karta0898098/kara/errors"
+
+	"github.com/samuel/go-zookeeper/zk"
 )
 
 var _ domain.RateLimiterService = &rateLimiterService{}
@@ -15,14 +17,20 @@ type rateLimiterService struct {
 	maxCount       int64
 	timeUintSecond int64
 	repo           repository.RateLimiterRepository
+	redisLock      *zk.Lock
+
+	skipLock bool
 }
 
 // NewRateLimiterService ...
-func NewRateLimiterService(repo repository.RateLimiterRepository, config Config) domain.RateLimiterService {
+func NewRateLimiterService(repo repository.RateLimiterRepository, zkConn *zk.Conn, config Config) domain.RateLimiterService {
+	redisLock := zk.NewLock(zkConn, "/lock", zk.WorldACL(zk.PermAll))
+
 	return &rateLimiterService{
 		maxCount:       config.MaxCount,
 		timeUintSecond: config.RateLimitSec,
 		repo:           repo,
+		redisLock:      redisLock,
 	}
 }
 
@@ -35,6 +43,20 @@ func (srv *rateLimiterService) RequireResource(ctx context.Context, addr string,
 
 	if addr == "" {
 		return nil, errors.ErrInternal.Build("addr must need input")
+	}
+
+	// Why lock here because GetRequestCount will has concurrency issue
+	// I chose zookeeper to resolve issue
+	// simple use just like mutex lock
+	// another solution maybe redis setnx lock
+	// notice srv.skipLock just for uint testing to skip zookeeper
+	// in local , dev , sit , prod you must check srv.skipLock always must be false
+	if !srv.skipLock {
+		err = srv.redisLock.Lock()
+		if err != nil {
+			return nil, errors.ErrInternal.Build("lock redis occur error %v", err)
+		}
+		defer srv.redisLock.Unlock()
 	}
 
 	// why key format is url + : + addr ?
