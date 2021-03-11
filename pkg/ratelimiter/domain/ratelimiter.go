@@ -13,6 +13,6 @@ type Claims struct {
 type RateLimiterService interface {
 	// RequireResource require access resource
 	// if too many request will return error
-	// must input addr because addr is unique key to identity witch ip income
+	// must input addr because addr is unique key to identity which ip income
 	RequireResource(ctx context.Context, addr string, url string) (claims *Claims, err error)
 }
