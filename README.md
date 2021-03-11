@@ -56,7 +56,7 @@ GET http://localhost:18080/api/v1/protected
 * 實作快速
 
 為了避免 race condition 的問題，所以選擇使用 [zookeeper](https://zookeeper.apache.org/ "link") 來做 lock 的動作，主要是覺得使用起來像原生的 mutex
-可以直覺的開發因時間問題沒有實作 redis setnx lock 的方式，當然關於 redis lock 還有許多解法。 </br> e.p :
+可以直覺的開發因時間問題沒有實作 redis setnx lock 的方式，當然關於 redis lock 還有許多解法。 </br> e.g. :
 
 * [redis setnx lock](https://redis.io/commands/setnx "link")
 * [redisLock](https://redis.io/topics/distlock "link")
