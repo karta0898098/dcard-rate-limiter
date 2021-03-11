@@ -51,7 +51,7 @@ func (s *rateLimiterTestSuite) SetupSuite() {
 			AppID: "rate_limiter",
 			Debug: true,
 		},
-		Http: httpInfra.Config{
+		HTTP: httpInfra.Config{
 			Mode: "debug",
 			Port: ":18080",
 		},

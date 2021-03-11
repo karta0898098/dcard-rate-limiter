@@ -7,6 +7,7 @@ import (
 	"github.com/samuel/go-zookeeper/zk"
 )
 
+// NewZookeeper ...
 func NewZookeeper(config Config) (*zk.Conn, error) {
 	c, _, err := zk.Connect([]string{config.Addr}, time.Second) // *10)
 	if err != nil {

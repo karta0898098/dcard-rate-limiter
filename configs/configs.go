@@ -18,13 +18,11 @@ import (
 type Configurations struct {
 	fx.Out
 	Log       zlog.Config
-	Http      http.Config
+	HTTP      http.Config
 	Redis     redis.Config
 	RateLimit service.Config
 	Zookeeper zookeeper.Config
 }
-
-
 
 // NewConfig read configs and create new instance
 func NewConfig(path string) Configurations {
