@@ -66,8 +66,12 @@ GET http://localhost:18080/api/v1/protected
 
 關於選擇使用 [go-redis](https://github.com/go-redis/redis "link") 只是筆者較為熟悉，且封裝良好，社群的數量活躍並且在 redis 的官網[推薦清單](https://redis.io/clients#go "link")中 。
 
-## License
 
+## TODO
+* Zookeeper 移植到 infra package 裡面
+* 實作 Redis setnx lock 並比較速度差異
+
+## License
 dcard-rate-limiter source code is available under an
 MIT [License](https://github.com/karta0898098/dcard-rate-limiter/blob/master/LICENSE "link").
 
