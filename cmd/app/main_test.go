@@ -15,7 +15,6 @@ import (
 	"github.com/karta0898098/dcard-rate-limiter/pkg/ratelimiter/service"
 	httpInfra "github.com/karta0898098/kara/http"
 
-	"github.com/karta0898098/dcard-rate-limiter/internal/zookeeper"
 	rc "github.com/karta0898098/kara/redis"
 	"github.com/karta0898098/kara/zlog"
 
@@ -62,15 +61,11 @@ func (s *rateLimiterTestSuite) SetupSuite() {
 			MaxCount:     60,
 			RateLimitSec: 60,
 		},
-		Zookeeper: zookeeper.Config{
-			Addr: "127.0.0.1:12181",
-		},
 	}
 
 	s.app = fx.New(
 		fx.Supply(config),
 		ratelimiter.Module,
-		fx.Provide(zookeeper.NewZookeeper),
 		fx.Provide(rc.NewRedis),
 		fx.Provide(httpInfra.NewEcho),
 		fx.Provide(restful.NewHandler),

@@ -7,13 +7,6 @@ services:
     restart: always
     networks:
       - ratelimiter
-  zookeeper:
-    image: "zookeeper:latest"
-    ports:
-      - "12181:2181"
-    restart: always
-    networks:
-      - ratelimiter
 networks:
   ratelimiter:
     name: ratelimiter

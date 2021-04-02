@@ -13,34 +13,20 @@ type RateLimiterRepository struct {
 	mock.Mock
 }
 
-// AddRequestCount provides a mock function with given fields: ctx, key, timeUintSecond
-func (_m *RateLimiterRepository) AddRequestCount(ctx context.Context, key string, timeUintSecond int64) error {
-	ret := _m.Called(ctx, key, timeUintSecond)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, int64) error); ok {
-		r0 = rf(ctx, key, timeUintSecond)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// GetRequestCount provides a mock function with given fields: ctx, key
-func (_m *RateLimiterRepository) GetRequestCount(ctx context.Context, key string) (int64, error) {
-	ret := _m.Called(ctx, key)
+// AddRequestCount provides a mock function with given fields: ctx, key, maxCount, timeUintSecond
+func (_m *RateLimiterRepository) AddRequestCount(ctx context.Context, key string, maxCount int64, timeUintSecond int64) (int64, error) {
+	ret := _m.Called(ctx, key, maxCount, timeUintSecond)
 
 	var r0 int64
-	if rf, ok := ret.Get(0).(func(context.Context, string) int64); ok {
-		r0 = rf(ctx, key)
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64, int64) int64); ok {
+		r0 = rf(ctx, key, maxCount, timeUintSecond)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, key)
+	if rf, ok := ret.Get(1).(func(context.Context, string, int64, int64) error); ok {
+		r1 = rf(ctx, key, maxCount, timeUintSecond)
 	} else {
 		r1 = ret.Error(1)
 	}

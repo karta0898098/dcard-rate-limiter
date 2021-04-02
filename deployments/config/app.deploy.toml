@@ -15,6 +15,3 @@ addr = "redis:6379"
 [rateLimit]
 max_count = 60
 rate_limit_sec = 60
-
-[zookeeper]
-addr = "zookeeper:2181"

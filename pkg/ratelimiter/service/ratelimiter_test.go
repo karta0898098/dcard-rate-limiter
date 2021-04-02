@@ -14,10 +14,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-var (
-	skipZookeeperLock = true
-)
-
 func TestRateLimiterServiceRequireResource(t *testing.T) {
 	var (
 		mockMaxCount       int64 = 10
@@ -61,14 +57,14 @@ func TestRateLimiterServiceRequireResource(t *testing.T) {
 			err:    errors.ErrInternal,
 		},
 		{
-			name: "GetRequestCountOccurError",
+			name: "AddRequestCountOccurError",
 			fields: fields{
 				maxCount:       mockMaxCount,
 				timeUintSecond: mockTimeUintSecond,
 				repo: func() repository.RateLimiterRepository {
 					repo := new(mocks.RateLimiterRepository)
 					repo.
-						On("GetRequestCount", mock.Anything, mock.Anything).
+						On("AddRequestCount", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 						Return(int64(0), errors.ErrInternal)
 					return repo
 				},
@@ -89,8 +85,8 @@ func TestRateLimiterServiceRequireResource(t *testing.T) {
 				repo: func() repository.RateLimiterRepository {
 					repo := new(mocks.RateLimiterRepository)
 					repo.
-						On("GetRequestCount", mock.Anything, mock.Anything).
-						Return(int64(10), nil)
+						On("AddRequestCount", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+						Return(int64(-1), nil)
 					return repo
 				},
 			},
@@ -103,30 +99,6 @@ func TestRateLimiterServiceRequireResource(t *testing.T) {
 			err:    errors.ErrTooManyRequests,
 		},
 		{
-			name: "AddRequestCountOccurError",
-			fields: fields{
-				maxCount:       mockMaxCount,
-				timeUintSecond: mockTimeUintSecond,
-				repo: func() repository.RateLimiterRepository {
-					repo := new(mocks.RateLimiterRepository)
-					repo.
-						On("GetRequestCount", mock.Anything, mock.Anything).
-						Return(int64(0), nil)
-					repo.
-						On("AddRequestCount", mock.Anything, mock.Anything, mock.Anything).
-						Return(errors.ErrInternal)
-					return repo
-				},
-			},
-			args: args{
-				ctx:  context.Background(),
-				addr: mockRemoteAddr,
-				url:  mockURL,
-			},
-			claims: nil,
-			err:    errors.ErrInternal,
-		},
-		{
 			name: "Success",
 			fields: fields{
 				maxCount:       mockMaxCount,
@@ -134,11 +106,8 @@ func TestRateLimiterServiceRequireResource(t *testing.T) {
 				repo: func() repository.RateLimiterRepository {
 					repo := new(mocks.RateLimiterRepository)
 					repo.
-						On("GetRequestCount", mock.Anything, mock.Anything).
+						On("AddRequestCount", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 						Return(int64(9), nil)
-					repo.
-						On("AddRequestCount", mock.Anything, mock.Anything, mock.Anything).
-						Return(nil)
 					return repo
 				},
 			},
@@ -161,7 +130,6 @@ func TestRateLimiterServiceRequireResource(t *testing.T) {
 				maxCount:       tt.fields.maxCount,
 				timeUintSecond: tt.fields.timeUintSecond,
 				repo:           tt.fields.repo(),
-				skipLock:       skipZookeeperLock,
 			}
 			claims, err := srv.RequireResource(tt.args.ctx, tt.args.addr, tt.args.url)
 			if err != nil {
